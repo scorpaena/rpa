@@ -28,9 +28,6 @@ ALL_AGENCIES = {
 }
 
 
-
-PATH = "C:/Users/38050/Documents/python/itdashboard_robot/download"
-
 URL = "https://itdashboard.gov"
 
 DIVE_IN_BUTTON = '//*[@id="node-23"]/div/div/div/div/div/div/div/a'

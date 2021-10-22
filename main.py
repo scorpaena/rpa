@@ -1,6 +1,6 @@
 from locator import *
 from utils import (
-    set_download_folder,
+    set_download_folder_in_current_directory,
     open_website,
     click_element,
     get_element_url_and_click_element,
@@ -11,7 +11,7 @@ from utils import (
 
 
 def main():
-    path = set_download_folder(path=PATH)
+    path = set_download_folder_in_current_directory()
     open_website(url=URL)
     click_element(locator=DIVE_IN_BUTTON)
     save_agencies_data_to_xls(

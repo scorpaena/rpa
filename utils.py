@@ -1,4 +1,5 @@
 import time
+import os
 
 from RPA.Browser.Selenium import Selenium
 from RPA.FileSystem import FileSystem
@@ -10,6 +11,7 @@ browser_lib = Selenium()
 file_system = FileSystem()
 xls_file = Files()
 
+path = f'{os.getcwd()}/download'
 
 def open_website(url):
     return browser_lib.open_available_browser(url)
@@ -28,7 +30,7 @@ def get_element_url_and_click_element(locator):
     return href
 
 
-def set_download_folder(path):
+def set_download_folder_in_current_directory(path=path):
     file_system.create_directory(path)
     browser_lib.set_download_directory(path)
     return path

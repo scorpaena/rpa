@@ -1,34 +1,18 @@
-from locator import *
-from utils import (
-    set_download_folder_in_current_directory,
-    open_website,
-    click_element,
-    get_element_url_and_click_element,
-    save_agencies_data_to_xls,
-    save_paginated_table_data_to_xls,
-    download_pdf_from_href_link,
-)
+from utils import ITDashBoardScraper
+
+scraper = ITDashBoardScraper()
 
 
-def main():
-    path = set_download_folder_in_current_directory()
-    open_website(url=URL)
-    click_element(locator=DIVE_IN_BUTTON)
-    save_agencies_data_to_xls(
-        agencies_locator=AGENCIES_TILES,
-        path=path
-    )
-    page_url = get_element_url_and_click_element(locator=AGENCY_BUTTON)
-    download_pdf_from_href_link(
-        table_locator=INVESTMENTS_TABLE,
-        page_url=page_url,
-        path=path
-    )
-    save_paginated_table_data_to_xls(
-        table_locator=INVESTMENTS_TABLE,
-        pagination_button_locator=TABLE_PAGINATION_BUTTON
-    )
+scraper.set_download_folder_in_current_directory()
 
+scraper.open_website()
 
-if __name__ == "__main__":
-    main()
+scraper.click_dive_in_button()
+
+scraper.save_agencies_data_to_xls()
+
+agency_page_url = scraper.click_agency_button_and_get_its_url()
+
+scraper.download_pdf_from_href_link(agency_page_url)
+
+scraper.save_paginated_table_data_to_xls()

@@ -39,3 +39,5 @@ AGENCY_BUTTON = f'{AGENCIES_TILES}{ALL_AGENCIES["National_Science_Foundation"]}'
 INVESTMENTS_TABLE = '//*[@id="investments-table-object"]'
 
 TABLE_PAGINATION_BUTTON = '//*[@id="investments-table-object_paginate"]/span/a'
+
+PDF_FILE_LINK = '//*[@id="business-case-pdf"]/a'

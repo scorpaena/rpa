@@ -79,23 +79,27 @@ class ITDashBoardScraper:
         file_system.create_directory(self.path)
         browser_lib.set_download_directory(self.path)
 
-    def save_agencies_data_to_xls(self, agencies_locator=loc.AGENCIES_TILES):
-        xls_file.create_workbook(f'{self.path}/template.xls')
-        xls_file.rename_worksheet('Sheet', 'Agencies')
-        blocks, _ , tiles_in_block = self._get_tile_elements_count(agencies_locator)
-        excel_row = 0
-        try:
-            for block in range(1, blocks + 1):
-                for tile in range(1, tiles_in_block + 1):
+    def agencies_data_generator(self, agencies_locator=loc.AGENCIES_TILES):
+        blocks, _, tiles_in_block = self._get_tile_elements_count(agencies_locator)
+        for block in range(1, blocks + 1):
+            for tile in range(1, tiles_in_block + 1):
+                try:
                     base = f'{agencies_locator}/div/div[{block}]/div[{tile}]/div/div/div/div[1]/a'
                     name = browser_lib.get_text(f'{base}/span[1]')
                     amount = browser_lib.get_text(f'{base}/span[2]')
-                    xls_file.set_cell_value(row=tile + excel_row, column=1, value=name)
-                    xls_file.set_cell_value(row=tile + excel_row, column=2, value=amount)
-                    xls_file.save_workbook()
-                excel_row += 3
-        except ElementNotFound:
-            return
+                    yield (name, amount)
+                except ElementNotFound:
+                    return
+
+    def save_agencies_data_to_xls(self, data_generator, agencies_locator=loc.AGENCIES_TILES):
+        xls_file.create_workbook(f'{self.path}/template.xls')
+        xls_file.rename_worksheet('Sheet', 'Agencies')
+        _, tiles, _ = self._get_tile_elements_count(agencies_locator)
+        for tile in range(1, tiles + 1):
+            data = next(data_generator)
+            xls_file.set_cell_value(row=tile, column=1, value=data[0])
+            xls_file.set_cell_value(row=tile, column=2, value=data[1])
+        xls_file.save_workbook()
 
     def download_pdf_from_href_link(
             self,
@@ -117,24 +121,34 @@ class ITDashBoardScraper:
                 browser_lib.close_browser()
                 self.open_website(page_url)
 
-
-    def save_paginated_table_data_to_xls(
+    def paginated_table_data_generator(
             self,
             table_locator=loc.INVESTMENTS_TABLE,
             pagination_button_locator=loc.TABLE_PAGINATION_BUTTON
     ):
-        xls_file.create_worksheet('Individual Investments')
         number_of_buttons = self._number_of_pagination_buttons(pagination_button_locator)
-        paginated_rows_number = 0
-        empty_row = 1
+        empty_rows_amount = 1
         for number in range(1, number_of_buttons + 1):
             self._click_next_pagination_button(f'{pagination_button_locator}[{number}]')
             time.sleep(10)
             rows_number, columns_number = self._get_table_rows_columns_number(table_locator)
             for row in range(1, rows_number + 1):
                 for column in range(1, columns_number + 1):
-                    value = browser_lib.get_table_cell(f'{table_locator}', row + empty_row, column)
-                    xls_file.set_cell_value(row + paginated_rows_number, column, value)
-            empty_row = 2
-            paginated_rows_number += 10
-        xls_file.save_workbook()
+                    value = browser_lib.get_table_cell(table_locator, row + empty_rows_amount, column)
+                    yield value
+            empty_rows_amount = 2
+
+    def save_paginated_table_data_to_xls(self, data_generator, table_locator=loc.INVESTMENTS_TABLE):
+        xls_file.create_worksheet('Individual Investments')
+        _, columns_number = self._get_table_rows_columns_number(table_locator)
+        row = 0
+        while True:
+            row += 1
+            for column in range(1, columns_number + 1):
+                try:
+                    value = next(data_generator)
+                    xls_file.set_cell_value(row, column, value)
+                except StopIteration:
+                    xls_file.set_active_worksheet('Agencies')
+                    xls_file.save_workbook()
+                    return

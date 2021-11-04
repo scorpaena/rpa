@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 rpaframework = "*"
+"pdfminer.six" = "*"
+pypdf2 = "*"
 
 [dev-packages]
 
